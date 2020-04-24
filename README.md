@@ -27,3 +27,4 @@ pipenv install
 */5 * * * * cd /home/m4k5/librus_sync && /usr/local/bin/pipenv run python3 main.py messages >> /tmp/libr_mess.out
 ```
 Windows and MacOS are supported, but you have to find out yourself how to set this up.
+**I am not affilated with Librus in any way. You are using this at your own responsibility.**
