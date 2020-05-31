@@ -7,6 +7,7 @@ import pytz
 import requests
 import todoist
 from caldav.lib.error import NotFoundError
+from dateparser.search import search_dates
 from decouple import config
 from librus_tricks import create_session
 
@@ -95,7 +96,16 @@ _liblink = re.compile(r'https:\/\/liblink\.pl\/\w+')
 def process_liblinks(text):
     def replace(match):
         return get_proper_link(match.group(0))
+
     return _liblink.sub(replace, text)
+
+
+def get_due(text):
+    try:
+        first_date = search_dates(text)[0][0]
+        return first_date
+    except:
+        return None
 
 
 class Messages2Todoist:
@@ -117,10 +127,11 @@ class Messages2Todoist:
                     last_message_header_pickle(messages[0].header)
                     break
                 new_task = self.todoist.items.add(
-                    "{} od {}".format(message.header, message.author)
+                    "{} od {}".format(message.header, message.author),
+                    due={"string": get_due(message.text)}
                 )
-                processed_content = self.process_liblinks(message.text)
-                self.todoist.notes.add(new_task.temp_id, message.text)
+                processed_content = process_liblinks(message.text)
+                self.todoist.notes.add(new_task.temp_id, processed_content)
 
 
 def sync_timetable(librus_session):
