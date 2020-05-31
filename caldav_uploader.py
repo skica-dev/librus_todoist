@@ -15,7 +15,7 @@ class CalendarDAV(caldav.DAVClient):
         meantime_events = self.calendar.date_search(start, end)
         for calendar_event in meantime_events:
             event = Calendar.from_ical(calendar_event.data).subcomponents[0]
-            if "*" in event["SUMMARY"]:
+            if "*" in event["SUMMARY"] or "Sleep" in event["SUMMARY"]:
                 return True
 
     def add_event(self, uid, start, end, summary, location, color=None):
