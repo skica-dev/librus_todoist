@@ -1,8 +1,10 @@
-import sys
 import pickle
+import re
+import sys
 from datetime import datetime, timedelta
 
 import pytz
+import requests
 import todoist
 from caldav.lib.error import NotFoundError
 from decouple import config
@@ -49,7 +51,7 @@ class Timetable2CalDav:
                     continue
                 try:
                     location = (
-                        lesson.classroom.name + ", " + self.session.school_location
+                            lesson.classroom.name + ", " + self.session.school_location
                     )
                 except TypeError:
                     location = self.session.school_location
@@ -81,6 +83,21 @@ def last_message_header_pickle(new=None):
         return "Drodzy Uczniowie"
 
 
+def get_proper_link(url):
+    link_content = requests.get(url)
+    proper_link = re.findall(r'<span style="color: #646464;">(.+)<\/span>', link_content.text)[0]
+    return proper_link
+
+
+_liblink = re.compile(r'https:\/\/liblink\.pl\/\w+')
+
+
+def process_liblinks(text):
+    def replace(match):
+        return get_proper_link(match.group(0))
+    return _liblink.sub(replace, text)
+
+
 class Messages2Todoist:
     def __init__(self, synergia_session, todoist):
         self.session = synergia_session.session
@@ -102,6 +119,7 @@ class Messages2Todoist:
                 new_task = self.todoist.items.add(
                     "{} od {}".format(message.header, message.author)
                 )
+                processed_content = self.process_liblinks(message.text)
                 self.todoist.notes.add(new_task.temp_id, message.text)
 
 
