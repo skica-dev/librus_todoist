@@ -81,7 +81,7 @@ def last_message_header_pickle(new=None):
             header = pickle.load(fi)
             return header
     except:
-        return "Drodzy Uczniowie"
+        return "Szkoła Przygody SAS!"
 
 
 def get_proper_link(url):
@@ -102,8 +102,8 @@ def process_liblinks(text):
 
 def get_due(text):
     try:
-        first_date = search_dates(text)[0][0]
-        return first_date
+        first_date = search_dates(text)[0][1]
+        return str(first_date)
     except:
         return None
 
@@ -123,6 +123,7 @@ class Messages2Todoist:
             for message in messages:
                 print(message.header)
                 if message.header == last_message_header:
+                    print("{} matches {}".format(message.header, last_message_header))
                     self.todoist.commit()
                     last_message_header_pickle(messages[0].header)
                     break
@@ -158,6 +159,6 @@ if __name__ == "__main__":
     try:
         assert sys.argv[1] == "messages"
         sync_messages(librus_session)
-    except:
+    except AssertionError:
         IGNORED_SUBJECTS = ["wychowanie fizyczne fakultet", "_opieka_WF"]
         sync_timetable(librus_session)
